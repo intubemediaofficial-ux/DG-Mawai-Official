@@ -439,7 +439,7 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
           )}
 
           {tab === "photos" && (
-            <Section title="Photo Gallery" desc="Tick 'Hero slider' to show a photo in the top slider. 'Large' makes it bigger in the gallery.">
+            <Section title="Photo Gallery" desc="Ticked photos appear full-screen on the Home page (first one is the cover). All photos appear in the About → Moments slider.">
               <label className={`${btnGold} mb-6 cursor-pointer`}>
                 {bulkBusy ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />} Upload photos
                 <input type="file" accept="image/*" multiple className="hidden" onChange={async (e) => {
@@ -455,7 +455,8 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
               </label>
               <ListEditor items={content.photos} blank={{ src: "", label: "", category: "Gallery" }} addLabel="Add photo by URL" title={(p) => p.label} onChange={(v) => set("photos", v)} fields={[
                 { key: "src", label: "Image", type: "image" }, { key: "label", label: "Caption" }, { key: "category", label: "Category" },
-                { key: "hero", label: "Hero slider", type: "checkbox" }, { key: "large", label: "Large in gallery", type: "checkbox" },
+                { key: "focus", label: "Focus point (crop)", placeholder: "50% 25%  (x% y% — lower y shows more of the head)" },
+                { key: "hero", label: "Show full-screen on Home page", type: "checkbox" }, { key: "large", label: "Featured", type: "checkbox" },
               ]} />
             </Section>
           )}
@@ -465,7 +466,8 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
               <Section title="Trending Songs">
                 <ListEditor items={content.songs} blank={{ title: "", plays: "", year: String(new Date().getFullYear()), duration: "", trending: false }} title={(s) => s.title} onChange={(v) => set("songs", v)} fields={[
                   { key: "title", label: "Song title" }, { key: "plays", label: "Plays / views", placeholder: "500K+" }, { key: "year", label: "Year" }, { key: "duration", label: "Duration", placeholder: "4:30" },
-                  { key: "trending", label: "Trending (fire badge)", type: "checkbox" },
+                  { key: "youtube", label: "YouTube link", placeholder: "https://youtube.com/watch?v=..." }, { key: "spotify", label: "Spotify link (optional)" }, { key: "apple", label: "Apple Music link (optional)" },
+                  { key: "trending", label: "Trending badge", type: "checkbox" },
                 ]} />
               </Section>
               <Section title="Upcoming / Latest Releases">
@@ -480,7 +482,7 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
             <Section title="Music Videos">
               <ListEditor items={content.videos} blank={{ title: "", image: "", url: "", views: "", duration: "" }} title={(s) => s.title} onChange={(v) => set("videos", v)} fields={[
                 { key: "title", label: "Title" }, { key: "url", label: "YouTube link" }, { key: "views", label: "Views" }, { key: "duration", label: "Duration" },
-                { key: "image", label: "Thumbnail", type: "image" },
+                { key: "image", label: "Thumbnail (leave empty to use YouTube thumbnail)", type: "image" },
               ]} />
             </Section>
           )}
@@ -494,8 +496,8 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
                   { key: "ticketUrl", label: "External ticket link (optional)", placeholder: "https://..." },
                 ]} />
               </Section>
-              <Section title="Past Performances">
-                <ListEditor items={content.pastEvents} blank={{ city: "", event: "" }} title={(s) => `${s.city} — ${s.event}`} onChange={(v) => set("pastEvents", v)} fields={[{ key: "city", label: "City" }, { key: "event", label: "Event" }]} />
+              <Section title="Archives (past performances)">
+                <ListEditor items={content.pastEvents} blank={{ city: "", event: "", venue: "", date: "" }} title={(s) => `${s.event} — ${s.city}`} onChange={(v) => set("pastEvents", v)} fields={[{ key: "event", label: "Event" }, { key: "city", label: "City" }, { key: "venue", label: "Venue" }, { key: "date", label: "Date" }]} />
               </Section>
             </>
           )}
