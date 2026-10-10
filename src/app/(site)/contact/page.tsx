@@ -4,7 +4,12 @@ import PageHeader from "@/components/site/PageHeader";
 import { getContent } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Book a Show | DG Mawai" };
+export const metadata: Metadata = {
+  title: "Book a Show",
+  description: "Book DG Mawai for weddings, festivals, corporate and live events. Send a booking enquiry or WhatsApp.",
+  alternates: { canonical: "/contact" },
+  openGraph: { title: "Book a Show | DG Mawai", description: "Book DG Mawai for weddings, festivals, corporate and live events. Send a booking enquiry or WhatsApp.", url: "/contact" },
+};
 
 export default async function ContactPage() {
   const { contact, bookingInfo } = await getContent();

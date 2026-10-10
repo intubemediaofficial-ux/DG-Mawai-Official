@@ -1,5 +1,6 @@
-export default function PageHeader({ eyebrow, title }: { eyebrow?: string; title?: string }) {
-  if (!eyebrow && !title) return <div className="h-28 sm:h-36" />;
+export default function PageHeader({ eyebrow, title, srTitle }: { eyebrow?: string; title?: string; srTitle?: string }) {
+  if (!eyebrow && !title)
+    return <div className="h-28 sm:h-36">{srTitle && <h1 className="sr-only">{srTitle}</h1>}</div>;
   return (
     <div className="px-5 pb-10 pt-32 text-center sm:pt-40">
       {eyebrow && <p className="nav-link fade-up text-[10px] uppercase text-gold sm:text-xs">{eyebrow}</p>}

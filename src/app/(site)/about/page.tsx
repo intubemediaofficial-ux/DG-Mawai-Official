@@ -6,7 +6,12 @@ import Img from "@/components/site/Img";
 import { getContent } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "About | DG Mawai" };
+export const metadata: Metadata = {
+  title: "About & Biography",
+  description: "Biography of DG Mawai, Rajasthani Gurjar Rasiya singer — journey, milestones, photos and upcoming releases.",
+  alternates: { canonical: "/about" },
+  openGraph: { title: "About & Biography | DG Mawai", description: "Biography of DG Mawai, Rajasthani Gurjar Rasiya singer — journey, milestones, photos and upcoming releases.", url: "/about" },
+};
 
 export default async function AboutPage() {
   const { about, achievements, photos, releases } = await getContent();
