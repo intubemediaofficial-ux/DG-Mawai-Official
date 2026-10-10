@@ -1,10 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import PhotoPanel from "@/components/site/PhotoPanel";
 import VideoCarousel from "@/components/site/VideoCarousel";
+import { pageMetadata } from "@/lib/seo";
 import { getContent } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("home", "/");
+}
 
 export default async function Home() {
   const content = await getContent();
@@ -31,7 +36,7 @@ export default async function Home() {
         {before.map((p) => <PhotoPanel key={p.src} photo={p} />)}
       </div>
 
-      <VideoCarousel videos={content.videos} title="Latest Videos" />
+      <VideoCarousel videos={content.videos} title={content.texts.homeVideosTitle} />
 
       <div className="relative">
         {after.map((p) => <PhotoPanel key={p.src} photo={p} />)}
@@ -51,17 +56,17 @@ export default async function Home() {
           {next && (
             <Link href="/performance" className="reveal group mx-auto mt-20 flex max-w-3xl flex-col items-center justify-between gap-4 border-y border-white/10 py-8 text-left sm:flex-row">
               <div>
-                <p className="nav-link text-[10px] uppercase text-gold">Next performance</p>
+                <p className="nav-link text-[10px] uppercase text-gold">{content.texts.homeNextShow}</p>
                 <p className="mt-2 text-2xl font-light text-white">{next.title}</p>
                 <p className="text-sm font-light text-muted">{next.venue}, {next.city} · {next.date}</p>
               </div>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/60 px-6 py-3 text-sm text-white transition group-hover:bg-white group-hover:text-black">
-                All shows <ArrowUpRight size={16} />
+                {content.texts.homeAllShows} <ArrowUpRight size={16} />
               </span>
             </Link>
           )}
           <Link href="/contact" className="mt-14 inline-flex items-center gap-2 border-b border-white pb-2 text-sm uppercase tracking-[0.3em] text-white hover:text-white/70">
-            Book a show <ArrowUpRight size={14} />
+            {content.texts.bookCta} <ArrowUpRight size={14} />
           </Link>
         </div>
       </section>

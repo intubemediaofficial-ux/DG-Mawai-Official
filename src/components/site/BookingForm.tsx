@@ -56,7 +56,7 @@ export default function BookingForm() {
         <input className={field} name="city" placeholder="City / venue" value={f.city} onChange={on} />
         <select className={`${field} [&>option]:bg-black`} name="eventType" value={f.eventType} onChange={on}>
           <option value="">Event type</option>
-          {["Wedding", "Live Concert", "Festival / Mela", "Corporate Event", "Private Party", "Religious / Cultural", "Other"].map((o) => <option key={o}>{o}</option>)}
+          {content.texts.eventTypes.filter(Boolean).map((o) => <option key={o}>{o}</option>)}
         </select>
         <input className={`${field} [color-scheme:dark]`} name="eventDate" type="date" value={f.eventDate} onChange={on} aria-label="Event date" />
       </div>
@@ -64,7 +64,7 @@ export default function BookingForm() {
       {error && <p className="pt-2 text-sm text-accent">{error}</p>}
       <div className="pt-8">
         <button disabled={state === "sending"} className="inline-flex items-center gap-3 rounded-full bg-white px-9 py-4 font-medium text-black transition hover:bg-white/85 disabled:opacity-60">
-          {state === "sending" ? <Loader2 className="animate-spin" size={18} /> : <ArrowUpRight size={18} />} Send booking request
+          {state === "sending" ? <Loader2 className="animate-spin" size={18} /> : <ArrowUpRight size={18} />} {content.texts.bookButton}
         </button>
       </div>
     </form>

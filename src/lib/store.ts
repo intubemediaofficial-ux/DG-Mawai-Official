@@ -34,6 +34,14 @@ export async function getContent(): Promise<SiteContent> {
     about: { ...defaultContent.about, ...saved.about },
     socials: { ...defaultContent.socials, ...saved.socials },
     contact: { ...defaultContent.contact, ...saved.contact },
+    texts: { ...defaultContent.texts, ...saved.texts },
+    seo: {
+      home: { ...defaultContent.seo.home, ...saved.seo?.home },
+      music: { ...defaultContent.seo.music, ...saved.seo?.music },
+      performance: { ...defaultContent.seo.performance, ...saved.seo?.performance },
+      about: { ...defaultContent.seo.about, ...saved.seo?.about },
+      contact: { ...defaultContent.seo.contact, ...saved.seo?.contact },
+    },
   };
 }
 
@@ -58,6 +66,7 @@ export type Enquiry = {
   eventType: string;
   eventDate: string;
   eventTitle: string;
+  ticketType?: string;
   tickets: number;
   message: string;
   status: EnquiryStatus;

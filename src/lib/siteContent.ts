@@ -18,6 +18,12 @@ export type SiteSong = {
   apple?: string;
 };
 
+export type TicketTier = {
+  name: string;
+  price: string;
+  soldOut?: boolean;
+};
+
 export type SiteEvent = {
   title: string;
   date: string;
@@ -27,7 +33,52 @@ export type SiteEvent = {
   status: string;
   price: string;
   ticketUrl?: string;
+  image?: string;
+  description?: string;
+  tickets?: TicketTier[];
 };
+
+export type SiteRelease = {
+  title: string;
+  status: string;
+  year: string;
+  youtube?: string;
+  spotify?: string;
+  apple?: string;
+};
+
+export type SiteTexts = {
+  navHome: string;
+  navMusic: string;
+  navPerformance: string;
+  navMore: string;
+  navBook: string;
+  footer: string;
+  homeVideosTitle: string;
+  homeNextShow: string;
+  homeAllShows: string;
+  bookCta: string;
+  musicSongsTab: string;
+  musicReleasesTab: string;
+  showsUpcomingTab: string;
+  showsArchivesTab: string;
+  noShows: string;
+  performedLabel: string;
+  getTickets: string;
+  requestTickets: string;
+  soldOut: string;
+  aboutMilestones: string;
+  aboutMoments: string;
+  aboutUpcoming: string;
+  aboutCta: string;
+  bookEyebrow: string;
+  bookTitle: string;
+  bookButton: string;
+  eventTypes: string[];
+};
+
+export type PageSeo = { title: string; description: string };
+export type SeoPage = "home" | "music" | "performance" | "about" | "contact";
 
 export type SiteSocials = {
   instagram: string;
@@ -65,7 +116,7 @@ export type SiteContent = {
   };
   photos: SitePhoto[];
   songs: SiteSong[];
-  releases: { title: string; status: string; year: string }[];
+  releases: SiteRelease[];
   videos: SiteVideo[];
   events: SiteEvent[];
   pastEvents: { city: string; event: string; venue?: string; date?: string }[];
@@ -78,6 +129,8 @@ export type SiteContent = {
     phone: string;
     location: string;
   };
+  texts: SiteTexts;
+  seo: Record<SeoPage, PageSeo>;
 };
 
 export const defaultContent: SiteContent = {
@@ -148,8 +201,8 @@ export const defaultContent: SiteContent = {
     { title: "Kabutar Bole Gutar Gu", image: "/images/dg-mawai/yt-SSjFsFXgzMU.jpg", url: "https://www.youtube.com/watch?v=SSjFsFXgzMU", views: "Viral Dance", duration: "6:11" },
   ],
   events: [
-    { title: "Live Rasiya Night", date: "15 July 2026", time: "8:00 PM", venue: "Rajasthan Cultural Center", city: "Jaipur, Rajasthan", status: "Tickets Available", price: "From ₹499" },
-    { title: "Gurjar Mahotsav 2026", date: "22 July 2026", time: "7:00 PM", venue: "Community Ground", city: "Bharatpur, Rajasthan", status: "Tickets Available", price: "From ₹299" },
+    { title: "Live Rasiya Night", date: "15 July 2026", time: "8:00 PM", venue: "Rajasthan Cultural Center", city: "Jaipur, Rajasthan", status: "Tickets Available", price: "From ₹499", tickets: [{ name: "Silver", price: "₹499" }, { name: "Gold", price: "₹999" }, { name: "VIP", price: "₹1999" }] },
+    { title: "Gurjar Mahotsav 2026", date: "22 July 2026", time: "7:00 PM", venue: "Community Ground", city: "Bharatpur, Rajasthan", status: "Tickets Available", price: "From ₹299", tickets: [{ name: "General", price: "₹299" }, { name: "VIP", price: "₹799" }] },
     { title: "Independence Day Special Show", date: "15 August 2026", time: "6:00 PM", venue: "Stadium Ground", city: "Agra, UP", status: "Coming Soon", price: "TBA" },
     { title: "Navratri Rasiya Utsav", date: "October 2026", time: "7:30 PM", venue: "Main Stage", city: "Mathura, UP", status: "Coming Soon", price: "TBA" },
   ],
@@ -187,5 +240,56 @@ export const defaultContent: SiteContent = {
     whatsapp: "919999999999",
     phone: "",
     location: "Rajasthan, India",
+  },
+  texts: {
+    navHome: "Home",
+    navMusic: "Music",
+    navPerformance: "Performance",
+    navMore: "More",
+    navBook: "Book",
+    footer: "DG Mawai. All rights reserved",
+    homeVideosTitle: "Latest Videos",
+    homeNextShow: "Next performance",
+    homeAllShows: "All shows",
+    bookCta: "Book a show",
+    musicSongsTab: "Songs",
+    musicReleasesTab: "Releases",
+    showsUpcomingTab: "Upcoming",
+    showsArchivesTab: "Archives",
+    noShows: "New shows will be announced soon.",
+    performedLabel: "Performed",
+    getTickets: "Get Tickets",
+    requestTickets: "Request Tickets",
+    soldOut: "Sold Out",
+    aboutMilestones: "Milestones",
+    aboutMoments: "Moments",
+    aboutUpcoming: "Upcoming",
+    aboutCta: "Bring DG Mawai to your stage.",
+    bookEyebrow: "Bookings & Enquiries",
+    bookTitle: "Book a Show",
+    bookButton: "Send booking request",
+    eventTypes: ["Wedding", "Live Concert", "Festival / Mela", "Corporate Event", "Private Party", "Religious / Cultural", "Other"],
+  },
+  seo: {
+    home: {
+      title: "DG Mawai | Official Website – Rajasthani Rasiya Singer",
+      description: "Official website of DG Mawai, Rajasthani Gurjar Rasiya singer. Listen to viral songs like Chhori Teri Chal Morni Ki Dhal, see upcoming live shows, get tickets and book DG Mawai for your event.",
+    },
+    music: {
+      title: "Music",
+      description: "Listen to DG Mawai songs and new releases — viral Rasiya hits on YouTube, Spotify, Apple Music and JioSaavn.",
+    },
+    performance: {
+      title: "Live Shows & Tickets",
+      description: "Upcoming DG Mawai live shows and Rasiya nights — dates, venues, ticket prices and ticket requests. Past performances archive.",
+    },
+    about: {
+      title: "About & Biography",
+      description: "Biography of DG Mawai, Rajasthani Gurjar Rasiya singer — journey, milestones, photos and upcoming releases.",
+    },
+    contact: {
+      title: "Book a Show",
+      description: "Book DG Mawai for weddings, festivals, corporate and live events. Send a booking enquiry or WhatsApp.",
+    },
   },
 };

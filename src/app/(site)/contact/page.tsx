@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import BookingForm from "@/components/site/BookingForm";
 import PageHeader from "@/components/site/PageHeader";
 import { getContent } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Book a Show",
-  description: "Book DG Mawai for weddings, festivals, corporate and live events. Send a booking enquiry or WhatsApp.",
-  alternates: { canonical: "/contact" },
-  openGraph: { title: "Book a Show | DG Mawai", description: "Book DG Mawai for weddings, festivals, corporate and live events. Send a booking enquiry or WhatsApp.", url: "/contact" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("contact", "/contact");
+}
 
 export default async function ContactPage() {
-  const { contact, bookingInfo } = await getContent();
+  const { contact, bookingInfo, texts } = await getContent();
   const rows = [
     { label: "Email", value: contact.email, href: `mailto:${contact.email}` },
     { label: "WhatsApp", value: `+${contact.whatsapp}`, href: `https://wa.me/${contact.whatsapp}` },
@@ -22,7 +20,7 @@ export default async function ContactPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Bookings & Enquiries" title="Book a Show" />
+      <PageHeader eyebrow={texts.bookEyebrow} title={texts.bookTitle} />
       <div className="mx-auto grid max-w-6xl gap-16 px-5 pb-40 pt-10 sm:px-10 lg:grid-cols-[1fr_1.6fr] lg:gap-24">
         <aside className="fade-up space-y-10">
           {rows.map((r) => (

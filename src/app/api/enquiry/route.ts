@@ -18,6 +18,7 @@ export async function POST(request: Request) {
     eventType: clean(body.eventType, 120),
     eventDate: clean(body.eventDate, 40),
     eventTitle: clean(body.eventTitle, 200),
+    ticketType: clean(body.ticketType, 120),
     tickets: Math.max(0, Math.min(50, Number(body.tickets) || 0)),
     message: clean(body.message, 2000),
   });

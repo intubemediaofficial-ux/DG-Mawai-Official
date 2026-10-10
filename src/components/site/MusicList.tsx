@@ -33,7 +33,7 @@ export default function MusicList() {
 
   return (
     <>
-      <Tabs tabs={[{ id: "songs", label: "Songs" }, { id: "releases", label: "Releases" }]} value={tab} onChange={setTab} />
+      <Tabs tabs={[{ id: "songs", label: content.texts.musicSongsTab }, { id: "releases", label: content.texts.musicReleasesTab }]} value={tab} onChange={setTab} />
       <div className="mx-auto max-w-6xl px-5 pb-40 sm:px-10">
         {tab === "songs" &&
           content.songs.map((song, i) => (
@@ -57,7 +57,7 @@ export default function MusicList() {
                   <span className={/soon|upcoming/i.test(r.status) ? "text-gold" : ""}>{r.status}</span> · {r.year}
                 </p>
               </div>
-              <Platforms youtube={s.youtube} spotify={s.spotify} apple={s.appleMusic} />
+              <Platforms youtube={r.youtube || s.youtube} spotify={r.spotify || s.spotify} apple={r.apple || s.appleMusic} />
             </div>
           ))}
       </div>
