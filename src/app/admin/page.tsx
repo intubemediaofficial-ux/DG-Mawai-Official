@@ -3,19 +3,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowDown, ArrowUp, CalendarDays, Check, Download, ExternalLink, Film, Home, Image as ImageIcon, Inbox,
-  KeyRound, Loader2, LogOut, Mail, Menu, Music2, Phone, Plus, Save, Share2, Trash2, Upload, User, X,
+  KeyRound, Loader2, LogOut, Mail, Menu, Music2, Phone, Plus, Save, Share2, Trash2, Type, Upload, User, X,
 } from "lucide-react";
 import Link from "next/link";
-import type { SiteContent } from "@/lib/siteContent";
+import type { SeoPage, SiteContent, SiteTexts } from "@/lib/siteContent";
 
 type Enquiry = {
   id: string; type: "booking" | "ticket" | "contact"; name: string; phone: string; email: string; city: string;
-  eventType: string; eventDate: string; eventTitle: string; tickets: number; message: string;
+  eventType: string; eventDate: string; eventTitle: string; ticketType?: string; tickets: number; message: string;
   status: "new" | "contacted" | "confirmed" | "closed"; note: string; createdAt: string;
 };
 
-type FieldType = "text" | "textarea" | "checkbox" | "image";
-type Field = { key: string; label: string; type?: FieldType; placeholder?: string; options?: string[] };
+type FieldType = "text" | "textarea" | "checkbox" | "image" | "list";
+type Field = { key: string; label: string; type?: FieldType; placeholder?: string; options?: string[]; fields?: Field[]; blank?: object; addLabel?: string };
 
 const input = "w-full rounded-lg border border-[#2a2a2a] bg-[#0a0a0a] px-3 py-2.5 text-sm text-white placeholder:text-gray-600 focus:border-[#d4af37] focus:outline-none";
 const card = "rounded-2xl border border-[#2a2a2a] bg-[#141414] p-5";
@@ -74,6 +74,11 @@ function FieldInput({ field, value, onChange }: { field: Field; value: unknown; 
         <textarea className={`${input} min-h-24`} value={String(value ?? "")} placeholder={field.placeholder} onChange={(e) => onChange(e.target.value)} />
       ) : field.type === "image" ? (
         <ImageInput value={String(value ?? "")} onChange={onChange} />
+      ) : field.type === "list" ? (
+        <div className="rounded-xl border border-dashed border-[#2a2a2a] p-3">
+          <ListEditor items={(value as object[]) ?? []} fields={field.fields ?? []} blank={field.blank ?? {}} addLabel={field.addLabel} onChange={onChange}
+            title={(it) => Object.values(it).filter((v) => typeof v === "string" && v).slice(0, 2).join(" · ")} />
+        </div>
       ) : field.options ? (
         <select className={input} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)}>
           {field.options.map((o) => <option key={o}>{o}</option>)}
@@ -90,7 +95,7 @@ function ObjectEditor<T extends object>({ value, fields, onChange }: { value: T;
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {fields.map((f) => (
-        <div key={f.key} className={f.type === "textarea" || f.type === "image" ? "md:col-span-2" : ""}>
+        <div key={f.key} className={f.type === "textarea" || f.type === "image" || f.type === "list" ? "md:col-span-2" : ""}>
           <FieldInput field={f} value={rec[f.key]} onChange={(v) => onChange({ ...value, [f.key]: v })} />
         </div>
       ))}
@@ -207,7 +212,7 @@ function Enquiries({ items, setItems }: { items: Enquiry[]; setItems: (v: Enquir
     }
   };
   const exportCsv = () => {
-    const cols: (keyof Enquiry)[] = ["createdAt", "type", "status", "name", "phone", "email", "city", "eventType", "eventDate", "eventTitle", "tickets", "message", "note"];
+    const cols: (keyof Enquiry)[] = ["createdAt", "type", "status", "name", "phone", "email", "city", "eventType", "eventDate", "eventTitle", "ticketType", "tickets", "message", "note"];
     const csv = [cols.join(","), ...shown.map((e) => cols.map((c) => `"${String(e[c] ?? "").replace(/"/g, '""')}"`).join(","))].join("\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
@@ -239,7 +244,7 @@ function Enquiries({ items, setItems }: { items: Enquiry[]; setItems: (v: Enquir
                 </div>
                 <p className="mt-2 text-lg font-bold text-white">{e.name}</p>
                 <p className="text-sm text-gray-400">
-                  {[e.eventTitle, e.eventType, e.eventDate, e.city, e.tickets ? `${e.tickets} ticket(s)` : ""].filter(Boolean).join(" • ")}
+                  {[e.eventTitle, e.eventType, e.eventDate, e.city, e.tickets ? `${e.tickets} ${e.ticketType || ""} ticket(s)` : ""].filter(Boolean).join(" • ")}
                 </p>
                 {e.message && <p className="mt-2 whitespace-pre-wrap text-sm text-gray-300">{e.message}</p>}
               </div>
@@ -293,9 +298,27 @@ const TABS = [
   { id: "videos", label: "Videos", icon: Film },
   { id: "events", label: "Events", icon: CalendarDays },
   { id: "contact", label: "Contact & Social", icon: Share2 },
+  { id: "texts", label: "Site Text & SEO", icon: Type },
   { id: "settings", label: "Settings", icon: KeyRound },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
+
+const TEXT_FIELDS: (Field & { key: Exclude<keyof SiteTexts, "eventTypes"> })[] = [
+  { key: "navHome", label: "Menu: Home" }, { key: "navMusic", label: "Menu: Music" }, { key: "navPerformance", label: "Menu: Performance" },
+  { key: "navMore", label: "Bottom: More" }, { key: "navBook", label: "Bottom: Book" }, { key: "footer", label: "Footer copyright" },
+  { key: "homeVideosTitle", label: "Home: videos heading" }, { key: "homeNextShow", label: "Home: next show label" }, { key: "homeAllShows", label: "Home: all shows button" },
+  { key: "bookCta", label: "Book a show link" }, { key: "musicSongsTab", label: "Music: songs tab" }, { key: "musicReleasesTab", label: "Music: releases tab" },
+  { key: "showsUpcomingTab", label: "Shows: upcoming tab" }, { key: "showsArchivesTab", label: "Shows: archives tab" }, { key: "noShows", label: "Shows: no upcoming text" },
+  { key: "performedLabel", label: "Archives label" }, { key: "getTickets", label: "Get tickets button" }, { key: "requestTickets", label: "Request tickets button" },
+  { key: "soldOut", label: "Sold out label" }, { key: "aboutMilestones", label: "About: milestones heading" }, { key: "aboutMoments", label: "About: photos heading" },
+  { key: "aboutUpcoming", label: "About: upcoming heading" }, { key: "aboutCta", label: "About: booking line" }, { key: "bookEyebrow", label: "Book page: small heading" },
+  { key: "bookTitle", label: "Book page: title" }, { key: "bookButton", label: "Book form button" },
+];
+
+const SEO_PAGES: { id: SeoPage; label: string }[] = [
+  { id: "home", label: "Home page" }, { id: "music", label: "Music page" }, { id: "performance", label: "Performance page" },
+  { id: "about", label: "About page" }, { id: "contact", label: "Book page" },
+];
 
 function Dashboard({ email, onLogout }: { email: string; onLogout: () => void }) {
   const [content, setContentState] = useState<SiteContent | null>(null);
@@ -473,6 +496,7 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
               <Section title="Upcoming / Latest Releases">
                 <ListEditor items={content.releases} blank={{ title: "", status: "Coming Soon", year: String(new Date().getFullYear()) }} title={(s) => s.title} onChange={(v) => set("releases", v)} fields={[
                   { key: "title", label: "Title" }, { key: "status", label: "Status", placeholder: "Coming Soon / Latest Release / Released" }, { key: "year", label: "Year" },
+                  { key: "youtube", label: "YouTube link (optional)" }, { key: "spotify", label: "Spotify link (optional)" }, { key: "apple", label: "Apple Music link (optional)" },
                 ]} />
               </Section>
             </>
@@ -489,11 +513,17 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
 
           {tab === "events" && (
             <>
-              <Section title="Upcoming Events" desc="Status 'Tickets Available' shows a Book Tickets button. Leave ticket link empty to collect requests in Enquiries.">
-                <ListEditor items={content.events} blank={{ title: "", date: "", time: "", venue: "", city: "", status: "Coming Soon", price: "TBA", ticketUrl: "" }} title={(s) => `${s.title} — ${s.date}`} onChange={(v) => set("events", v)} fields={[
+              <Section title="Upcoming Events" desc="Status 'Tickets Available' shows a Get Tickets button. Add ticket types (Silver, Gold, VIP…) with prices — fans pick one and the request lands in Enquiries. Leave the external ticket link empty to collect requests here.">
+                <ListEditor items={content.events} blank={{ title: "", date: "", time: "", venue: "", city: "", status: "Coming Soon", price: "TBA", ticketUrl: "", image: "", description: "", tickets: [] }} title={(s) => `${s.title} — ${s.date}`} onChange={(v) => set("events", v)} fields={[
                   { key: "title", label: "Event name" }, { key: "date", label: "Date" }, { key: "time", label: "Time" }, { key: "venue", label: "Venue" }, { key: "city", label: "City" },
                   { key: "status", label: "Status", options: ["Tickets Available", "Coming Soon", "Sold Out"] }, { key: "price", label: "Price", placeholder: "From ₹499" },
                   { key: "ticketUrl", label: "External ticket link (optional)", placeholder: "https://..." },
+                  { key: "description", label: "Description (optional)", type: "textarea" },
+                  { key: "image", label: "Event poster / photo (optional)", type: "image" },
+                  { key: "tickets", label: "Ticket types & prices", type: "list", addLabel: "Add ticket type", blank: { name: "", price: "", soldOut: false }, fields: [
+                    { key: "name", label: "Ticket name", placeholder: "Silver / Gold / VIP" }, { key: "price", label: "Price", placeholder: "₹499" },
+                    { key: "soldOut", label: "Sold out", type: "checkbox" },
+                  ] },
                 ]} />
               </Section>
               <Section title="Archives (past performances)">
@@ -522,6 +552,31 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
               </Section>
               <Section title="Booking Info Points">
                 <StringList items={content.bookingInfo} onChange={(v) => set("bookingInfo", v)} />
+              </Section>
+            </>
+          )}
+
+          {tab === "texts" && (
+            <>
+              <Section title="Website Text" desc="Every heading, menu and button label on the website.">
+                <div className={card}>
+                  <ObjectEditor value={content.texts} onChange={(v) => set("texts", v)} fields={TEXT_FIELDS} />
+                </div>
+              </Section>
+              <Section title="Booking form — event types">
+                <StringList items={content.texts.eventTypes} onChange={(v) => set("texts", { ...content.texts, eventTypes: v })} />
+              </Section>
+              <Section title="Google / SEO" desc="Title and description shown in Google search results and when links are shared.">
+                <div className="space-y-4">
+                  {SEO_PAGES.map(({ id, label }) => (
+                    <div key={id} className={card}>
+                      <p className="mb-4 font-bold text-white">{label}</p>
+                      <ObjectEditor value={content.seo[id]} onChange={(v) => set("seo", { ...content.seo, [id]: v })} fields={[
+                        { key: "title", label: "Title" }, { key: "description", label: "Description", type: "textarea" },
+                      ]} />
+                    </div>
+                  ))}
+                </div>
               </Section>
             </>
           )}

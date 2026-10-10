@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import GalleryCarousel from "@/components/site/GalleryCarousel";
@@ -6,15 +7,12 @@ import Img from "@/components/site/Img";
 import { getContent } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "About & Biography",
-  description: "Biography of DG Mawai, Rajasthani Gurjar Rasiya singer — journey, milestones, photos and upcoming releases.",
-  alternates: { canonical: "/about" },
-  openGraph: { title: "About & Biography | DG Mawai", description: "Biography of DG Mawai, Rajasthani Gurjar Rasiya singer — journey, milestones, photos and upcoming releases.", url: "/about" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("about", "/about");
+}
 
 export default async function AboutPage() {
-  const { about, achievements, photos, releases } = await getContent();
+  const { about, achievements, photos, releases, texts } = await getContent();
   const upcoming = releases.filter((r) => /soon|upcoming|latest/i.test(r.status));
 
   return (
@@ -41,7 +39,7 @@ export default async function AboutPage() {
       </section>
 
       <section className="px-5 pb-28 sm:pb-36">
-        <h2 className="reveal text-center text-3xl font-extralight text-gold sm:text-5xl">Milestones</h2>
+        <h2 className="reveal text-center text-3xl font-extralight text-gold sm:text-5xl">{texts.aboutMilestones}</h2>
         <div className="mx-auto mt-16 grid max-w-6xl sm:grid-cols-2 lg:grid-cols-3">
           {achievements.map((a, i) => (
             <div key={i} className="reveal border-white/10 px-8 py-10 text-center lg:[&:not(:nth-child(3n))]:border-r">
@@ -54,13 +52,13 @@ export default async function AboutPage() {
       </section>
 
       <section>
-        <h2 className="reveal pb-16 text-center text-3xl font-extralight text-white sm:text-5xl">Moments</h2>
+        <h2 className="reveal pb-16 text-center text-3xl font-extralight text-white sm:text-5xl">{texts.aboutMoments}</h2>
         <GalleryCarousel photos={photos} />
       </section>
 
       {upcoming.length > 0 && (
         <section className="px-5 py-28 text-center">
-          <h2 className="reveal text-3xl font-extralight text-white sm:text-5xl">Upcoming</h2>
+          <h2 className="reveal text-3xl font-extralight text-white sm:text-5xl">{texts.aboutUpcoming}</h2>
           <div className="mx-auto mt-14 max-w-3xl divide-y divide-white/10 border-y border-white/10">
             {upcoming.map((r, i) => (
               <div key={i} className="reveal flex items-center justify-between gap-4 py-7 text-left">
@@ -73,9 +71,9 @@ export default async function AboutPage() {
       )}
 
       <section className="px-5 pb-40 pt-10 text-center">
-        <p className="reveal text-2xl font-extralight text-white/85 sm:text-4xl">Bring DG Mawai to your stage.</p>
+        <p className="reveal text-2xl font-extralight text-white/85 sm:text-4xl">{texts.aboutCta}</p>
         <Link href="/contact" className="mt-10 inline-flex items-center gap-2 border-b border-white pb-2 text-sm uppercase tracking-[0.3em] text-white hover:text-white/70">
-          Book a show <ArrowUpRight size={14} />
+          {texts.bookCta} <ArrowUpRight size={14} />
         </Link>
       </section>
     </>
