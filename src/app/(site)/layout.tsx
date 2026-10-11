@@ -24,22 +24,50 @@ function abs(src: string) {
   return src.startsWith("http") ? src : `${SITE_URL}${src}`;
 }
 
+function istDate(d: Date, withTime: boolean) {
+  const p = (n: number) => String(n).padStart(2, "0");
+  const day = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  return withTime ? `${day}T${p(d.getHours())}:${p(d.getMinutes())}:00+05:30` : day;
+}
+
 function structuredData(content: SiteContent) {
   const artistId = `${SITE_URL}/#artist`;
   const sameAs = Object.values(content.socials).filter((u) => typeof u === "string" && u.startsWith("http"));
+  const cover = content.photos.find((p) => p.hero) ?? content.photos[0];
   const events = content.events
     .map((e) => ({ e, start: new Date(`${e.date} ${e.time}`.trim()) }))
     .filter(({ start }) => !Number.isNaN(start.getTime()))
-    .map(({ e, start }) => ({
-      "@type": "MusicEvent",
-      name: e.title,
-      startDate: start.toISOString().slice(0, 10),
-      eventStatus: "https://schema.org/EventScheduled",
-      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-      location: { "@type": "Place", name: e.venue || e.city, address: e.city },
-      performer: { "@id": artistId },
-      url: e.ticketUrl || `${SITE_URL}/performance`,
-    }));
+    .map(({ e, start }) => {
+      const url = e.ticketUrl || `${SITE_URL}/performance`;
+      const tiers = (e.tickets ?? []).filter((x) => x.name || x.price);
+      const offer = (name: string | undefined, price: string, soldOut?: boolean) => ({
+        "@type": "Offer",
+        name,
+        price: price.replace(/[^\d.]/g, "") || undefined,
+        priceCurrency: "INR",
+        availability: soldOut || /sold/i.test(e.status) ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        url,
+      });
+      return {
+        "@type": "MusicEvent",
+        name: e.title,
+        description: e.description || `${e.title} — live Rasiya performance by DG Mawai${e.venue ? ` at ${e.venue}` : ""}${e.city ? `, ${e.city}` : ""}.`,
+        image: [abs(e.image || cover?.src || content.about.image)],
+        startDate: istDate(start, Boolean(e.time)),
+        endDate: istDate(e.time ? new Date(start.getTime() + 3 * 3600 * 1000) : start, Boolean(e.time)),
+        eventStatus: "https://schema.org/EventScheduled",
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        location: {
+          "@type": "Place",
+          name: e.venue || e.city,
+          address: { "@type": "PostalAddress", addressLocality: e.city.split(",")[0].trim(), addressRegion: e.city.split(",")[1]?.trim() || undefined, addressCountry: "IN" },
+        },
+        performer: { "@id": artistId },
+        organizer: { "@type": "Organization", name: "DG Mawai Official", url: SITE_URL },
+        offers: tiers.length ? tiers.map((x) => offer(x.name, x.price, x.soldOut)) : [offer(undefined, e.price)],
+        url,
+      };
+    });
   return {
     "@context": "https://schema.org",
     "@graph": [
