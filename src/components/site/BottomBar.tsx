@@ -7,7 +7,7 @@ import SocialIcons from "./SocialIcons";
 export default function BottomBar() {
   const { texts } = useSiteContent().content;
   return (
-    <footer className="pointer-events-none fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-black/80 via-black/35 to-transparent">
+    <footer className="pointer-events-none fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-black via-black/75 to-transparent pt-6">
       <div className="pointer-events-auto mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-5 sm:h-24 sm:px-[7%]">
         <div className="nav-link flex items-center gap-3 text-[10px] font-light uppercase text-white/85 sm:gap-4 sm:text-[17px]">
           <Link href="/about" className="hover:text-white">{texts.navMore}</Link>
