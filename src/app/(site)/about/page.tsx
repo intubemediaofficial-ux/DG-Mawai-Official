@@ -12,13 +12,13 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const { about, achievements, photos, releases, texts } = await getContent();
+  const { about, achievements, photos, releases, texts, sections: show } = await getContent();
   const upcoming = releases.filter((r) => /soon|upcoming|latest/i.test(r.status));
 
   return (
     <>
       <section className="relative h-[100svh] overflow-hidden">
-        <Img src={about.image} alt={about.highlight} loading="eager" className="slow-zoom absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "50% 22%" }} />
+        <Img src={about.image} alt={about.highlight} loading="eager" className="slow-zoom absolute inset-0 h-full w-full object-cover" style={{ objectPosition: about.imageFocus || "50% 22%" }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent" />
         <div className="absolute inset-y-0 left-0 flex max-w-2xl flex-col justify-center px-5 sm:px-[8%]">
           <p className="nav-link fade-up text-[10px] uppercase text-gold sm:text-xs">{about.eyebrow}</p>
@@ -27,7 +27,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="px-5 py-28 sm:py-36">
+      {show.aboutBio && <section className="px-5 py-28 sm:py-36">
         <div className="mx-auto max-w-3xl">
           <h2 className="reveal text-center text-3xl font-extralight text-gold sm:text-5xl">{about.heading}</h2>
           <div className="mt-14 space-y-8">
@@ -36,9 +36,9 @@ export default async function AboutPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
-      <section className="px-5 pb-28 sm:pb-36">
+      {show.aboutMilestones && achievements.length > 0 && <section className="px-5 pb-28 sm:pb-36">
         <h2 className="reveal text-center text-3xl font-extralight text-gold sm:text-5xl">{texts.aboutMilestones}</h2>
         <div className="mx-auto mt-16 grid max-w-6xl sm:grid-cols-2 lg:grid-cols-3">
           {achievements.map((a, i) => (
@@ -49,14 +49,14 @@ export default async function AboutPage() {
             </div>
           ))}
         </div>
-      </section>
+      </section>}
 
-      <section>
+      {show.aboutMoments && photos.length > 0 && <section>
         <h2 className="reveal pb-16 text-center text-3xl font-extralight text-white sm:text-5xl">{texts.aboutMoments}</h2>
         <GalleryCarousel photos={photos} />
-      </section>
+      </section>}
 
-      {upcoming.length > 0 && (
+      {show.aboutUpcoming && upcoming.length > 0 && (
         <section className="px-5 py-28 text-center">
           <h2 className="reveal text-3xl font-extralight text-white sm:text-5xl">{texts.aboutUpcoming}</h2>
           <div className="mx-auto mt-14 max-w-3xl divide-y divide-white/10 border-y border-white/10">
@@ -70,12 +70,12 @@ export default async function AboutPage() {
         </section>
       )}
 
-      <section className="px-5 pb-40 pt-10 text-center">
+      {show.aboutCta && <section className="px-5 pb-40 pt-10 text-center">
         <p className="reveal text-2xl font-extralight text-white/85 sm:text-4xl">{texts.aboutCta}</p>
         <Link href="/contact" className="mt-10 inline-flex items-center gap-2 border-b border-white pb-2 text-sm uppercase tracking-[0.3em] text-white hover:text-white/70">
           {texts.bookCta} <ArrowUpRight size={14} />
         </Link>
-      </section>
+      </section>}
     </>
   );
 }

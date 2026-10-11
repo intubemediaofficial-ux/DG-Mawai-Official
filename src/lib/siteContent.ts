@@ -74,7 +74,36 @@ export type SiteTexts = {
   bookEyebrow: string;
   bookTitle: string;
   bookButton: string;
+  contactEmail: string;
+  contactWhatsapp: string;
+  contactPhone: string;
+  contactLocation: string;
+  formName: string;
+  formPhone: string;
+  formEmail: string;
+  formCity: string;
+  formEventType: string;
+  formMessage: string;
+  bookSuccessTitle: string;
+  bookSuccessText: string;
+  whatsappButton: string;
+  ticketTitle: string;
+  ticketSuccessTitle: string;
+  ticketSuccessText: string;
   eventTypes: string[];
+};
+
+export type SiteSections = {
+  homeVideos: boolean;
+  homeTagline: boolean;
+  homeStats: boolean;
+  homeNextShow: boolean;
+  homeBookCta: boolean;
+  aboutBio: boolean;
+  aboutMilestones: boolean;
+  aboutMoments: boolean;
+  aboutUpcoming: boolean;
+  aboutCta: boolean;
 };
 
 export type PageSeo = { title: string; description: string };
@@ -113,6 +142,7 @@ export type SiteContent = {
     heading: string;
     paragraphs: string[];
     image: string;
+    imageFocus?: string;
   };
   photos: SitePhoto[];
   songs: SiteSong[];
@@ -130,6 +160,7 @@ export type SiteContent = {
     location: string;
   };
   texts: SiteTexts;
+  sections: SiteSections;
   seo: Record<SeoPage, PageSeo>;
 };
 
@@ -155,6 +186,7 @@ export const defaultContent: SiteContent = {
       "From folk roots to viral Rasiya songs, DG Mawai brings the sound of Rajasthan to fans and live stages across India.",
     heading: "The Voice of Chambal & Rajasthan",
     image: "/images/dg-mawai/photo-08.jpg",
+    imageFocus: "50% 22%",
     paragraphs: [
       "DG Mawai is a Rajasthani Rasiya singer known for his powerful voice, energetic stage presence, and folk-inspired music style. His songs connect deeply with audiences who love Gurjar, Rajasthani, and Chambal-region folk culture.",
       "With viral songs such as Tum Badal Gaye Raja, Chhori Teri Chal Morni Ki Dhal, and Camper Mein Baithe Gunde, DG Mawai has built a strong identity among Rasiya music fans.",
@@ -268,7 +300,35 @@ export const defaultContent: SiteContent = {
     bookEyebrow: "Bookings & Enquiries",
     bookTitle: "Book a Show",
     bookButton: "Send booking request",
+    contactEmail: "Email",
+    contactWhatsapp: "WhatsApp",
+    contactPhone: "Phone",
+    contactLocation: "Based in",
+    formName: "Your name *",
+    formPhone: "Phone *",
+    formEmail: "Email",
+    formCity: "City / venue",
+    formEventType: "Event type",
+    formMessage: "Tell us about your event",
+    bookSuccessTitle: "Thank you, {name}.",
+    bookSuccessText: "Your booking request has reached DG Mawai's team. We will call you on {phone}.",
+    whatsappButton: "Also send on WhatsApp",
+    ticketTitle: "Book Tickets",
+    ticketSuccessTitle: "Tickets requested",
+    ticketSuccessText: "Team will call you on {phone} to confirm your tickets.",
     eventTypes: ["Wedding", "Live Concert", "Festival / Mela", "Corporate Event", "Private Party", "Religious / Cultural", "Other"],
+  },
+  sections: {
+    homeVideos: true,
+    homeTagline: true,
+    homeStats: true,
+    homeNextShow: true,
+    homeBookCta: true,
+    aboutBio: true,
+    aboutMilestones: true,
+    aboutMoments: true,
+    aboutUpcoming: true,
+    aboutCta: true,
   },
   seo: {
     home: {

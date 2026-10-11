@@ -16,6 +16,7 @@ export default function TicketModal({ event, onClose }: { event: SiteEvent; onCl
   const ticketType = tier ? `${tier.name} (${tier.price})` : "";
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = useState("");
+  const t = content.texts;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,10 +53,11 @@ export default function TicketModal({ event, onClose }: { event: SiteEvent; onCl
         {state === "done" ? (
           <div className="py-6 text-center">
             <CheckCircle2 size={48} strokeWidth={1} className="mx-auto mb-4 text-white" />
-            <h3 className="text-3xl font-extralight text-white">Tickets requested</h3>
-            <p className="mt-3 text-gray-400">Team will call you on {form.phone} to confirm your {form.tickets} {tier?.name} ticket(s).</p>
+            <h3 className="text-3xl font-extralight text-white">{t.ticketSuccessTitle}</h3>
+            <p className="mt-3 text-gray-400">{t.ticketSuccessText.replace(/\{phone\}/g, form.phone).replace(/\{name\}/g, form.name)}</p>
+            <p className="mt-2 text-sm text-gold">{form.tickets} × {tier ? ticketType : event.title}</p>
             <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex rounded-full border border-white/70 px-7 py-3 text-white transition hover:bg-white hover:text-black">
-              Confirm on WhatsApp
+              {t.whatsappButton}
             </a>
           </div>
         ) : (
@@ -63,7 +65,7 @@ export default function TicketModal({ event, onClose }: { event: SiteEvent; onCl
             <input type="text" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="hidden" tabIndex={-1} autoComplete="off" aria-hidden />
             <div>
               <p className="flex items-center gap-2 nav-link text-[10px] uppercase text-gold">
-                <Ticket size={16} /> Book Tickets
+                <Ticket size={16} /> {t.ticketTitle}
               </p>
               <h3 className="mt-3 text-3xl font-extralight text-white">{event.title}</h3>
               <p className="text-sm font-light text-muted">
@@ -73,31 +75,31 @@ export default function TicketModal({ event, onClose }: { event: SiteEvent; onCl
             </div>
             {tiers.length > 0 && (
               <div className="grid gap-2 pt-2">
-                {tiers.map((x) => (
+                {tiers.map((x, k) => (
                   <button
                     type="button"
-                    key={x.name}
+                    key={k}
                     disabled={x.soldOut}
                     onClick={() => setForm({ ...form, tier: x.name })}
                     className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left font-light transition disabled:opacity-30 ${form.tier === x.name ? "border-white bg-white/10 text-white" : "border-white/15 text-white/70 hover:border-white/40"}`}
                   >
                     <span>{x.name}</span>
-                    <span className="text-gold">{x.soldOut ? content.texts.soldOut : x.price}</span>
+                    <span className="text-gold">{x.soldOut ? t.soldOut : x.price}</span>
                   </button>
                 ))}
               </div>
             )}
-            <input className={inputClass} placeholder="Your Name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            <input className={inputClass} placeholder="Phone Number" type="tel" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-            <input className={inputClass} placeholder="Email (optional)" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <input className={inputClass} placeholder={t.formName} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <input className={inputClass} placeholder={t.formPhone} type="tel" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <input className={inputClass} placeholder={t.formEmail} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <div className="grid grid-cols-2 gap-3">
-              <input className={inputClass} placeholder="Your City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-              <input className={inputClass} type="number" min={1} max={50} value={form.tickets} onChange={(e) => setForm({ ...form, tickets: Number(e.target.value) })} aria-label="Tickets" />
+              <input className={inputClass} placeholder={t.formCity} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+              <input className={inputClass} type="number" min={1} max={50} value={form.tickets} onChange={(e) => setForm({ ...form, tickets: Math.max(1, Math.min(50, Number(e.target.value) || 1)) })} aria-label="Tickets" />
             </div>
             {error && <p className="text-sm text-accent">{error}</p>}
             <button disabled={state === "sending"} className="!mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-white py-4 font-medium text-black transition hover:bg-white/85 disabled:opacity-60">
               {state === "sending" && <Loader2 size={18} className="animate-spin" />}
-              {content.texts.requestTickets}
+              {t.requestTickets}
             </button>
           </form>
         )}

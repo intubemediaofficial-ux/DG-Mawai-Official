@@ -35,6 +35,7 @@ export async function getContent(): Promise<SiteContent> {
     socials: { ...defaultContent.socials, ...saved.socials },
     contact: { ...defaultContent.contact, ...saved.contact },
     texts: { ...defaultContent.texts, ...saved.texts },
+    sections: { ...defaultContent.sections, ...saved.sections },
     seo: {
       home: { ...defaultContent.seo.home, ...saved.seo?.home },
       music: { ...defaultContent.seo.music, ...saved.seo?.music },
@@ -46,12 +47,31 @@ export async function getContent(): Promise<SiteContent> {
 }
 
 export async function saveContent(content: SiteContent) {
-  const backupDir = path.join(DATA_DIR, "backups");
-  await fs.mkdir(backupDir, { recursive: true });
+  await fs.mkdir(BACKUP_DIR, { recursive: true });
   try {
-    await fs.copyFile(CONTENT_FILE, path.join(backupDir, `content-${Date.now()}.json`));
+    await fs.copyFile(CONTENT_FILE, path.join(BACKUP_DIR, `content-${Date.now()}.json`));
   } catch {}
   await writeJson(CONTENT_FILE, content);
+}
+
+const BACKUP_DIR = path.join(DATA_DIR, "backups");
+const BACKUP_NAME = /^content-\d+\.json$/;
+
+export async function listBackups() {
+  const files = await fs.readdir(BACKUP_DIR).catch(() => [] as string[]);
+  return files
+    .filter((f) => BACKUP_NAME.test(f))
+    .map((f) => ({ name: f, savedAt: new Date(Number(f.slice(8, -5))).toISOString() }))
+    .sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }))
+    .slice(0, 30);
+}
+
+export async function restoreBackup(name: string) {
+  if (!BACKUP_NAME.test(name)) return false;
+  const data = await readJson<SiteContent | null>(path.join(BACKUP_DIR, name), null);
+  if (!data) return false;
+  await saveContent(data);
+  return true;
 }
 
 export type EnquiryStatus = "new" | "contacted" | "confirmed" | "closed";

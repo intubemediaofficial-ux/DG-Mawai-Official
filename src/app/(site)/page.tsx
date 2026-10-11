@@ -19,6 +19,7 @@ export default async function Home() {
   const before = rest.slice(0, 2);
   const after = rest.slice(2);
   const next = content.events[0];
+  const show = content.sections;
 
   return (
     <>
@@ -33,41 +34,41 @@ export default async function Home() {
             </div>
           </PhotoPanel>
         )}
-        {before.map((p) => <PhotoPanel key={p.src} photo={p} />)}
+        {before.map((p, i) => <PhotoPanel key={i} photo={p} />)}
       </div>
 
-      <VideoCarousel videos={content.videos} title={content.texts.homeVideosTitle} />
+      {show.homeVideos && content.videos.length > 0 && <VideoCarousel videos={content.videos} title={content.texts.homeVideosTitle} />}
 
       <div className="relative">
-        {after.map((p) => <PhotoPanel key={p.src} photo={p} />)}
+        {after.map((p, i) => <PhotoPanel key={i} photo={p} />)}
       </div>
 
       <section className="relative z-10 bg-black px-5 py-28 sm:py-36">
         <div className="mx-auto max-w-5xl text-center">
-          <p className="reveal mx-auto max-w-3xl text-2xl font-extralight leading-relaxed text-white/90 sm:text-4xl">{content.hero.tagline}</p>
-          <div className="reveal mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-y-10 sm:grid-cols-4">
-            {content.hero.stats.map((s) => (
-              <div key={s.label} className="px-2">
+          {show.homeTagline && <p className="reveal mx-auto max-w-3xl text-2xl font-extralight leading-relaxed text-white/90 sm:text-4xl">{content.hero.tagline}</p>}
+          {show.homeStats && content.hero.stats.length > 0 && <div className="reveal mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-y-10 sm:grid-cols-4">
+            {content.hero.stats.map((s, i) => (
+              <div key={i} className="px-2">
                 <p className="text-4xl font-extralight text-white sm:text-5xl">{s.value}</p>
                 <p className="nav-link mt-2 text-[9px] uppercase text-muted sm:text-[10px]">{s.label}</p>
               </div>
             ))}
-          </div>
-          {next && (
+          </div>}
+          {show.homeNextShow && next && (
             <Link href="/performance" className="reveal group mx-auto mt-20 flex max-w-3xl flex-col items-center justify-between gap-4 border-y border-white/10 py-8 text-left sm:flex-row">
               <div>
                 <p className="nav-link text-[10px] uppercase text-gold">{content.texts.homeNextShow}</p>
                 <p className="mt-2 text-2xl font-light text-white">{next.title}</p>
-                <p className="text-sm font-light text-muted">{next.venue}, {next.city} · {next.date}</p>
+                <p className="text-sm font-light text-muted">{[next.venue, next.city].filter(Boolean).join(", ")}{next.date && ` · ${next.date}`}</p>
               </div>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/60 px-6 py-3 text-sm text-white transition group-hover:bg-white group-hover:text-black">
                 {content.texts.homeAllShows} <ArrowUpRight size={16} />
               </span>
             </Link>
           )}
-          <Link href="/contact" className="mt-14 inline-flex items-center gap-2 border-b border-white pb-2 text-sm uppercase tracking-[0.3em] text-white hover:text-white/70">
+          {show.homeBookCta && <Link href="/contact" className="mt-14 inline-flex items-center gap-2 border-b border-white pb-2 text-sm uppercase tracking-[0.3em] text-white hover:text-white/70">
             {content.texts.bookCta} <ArrowUpRight size={14} />
-          </Link>
+          </Link>}
         </div>
       </section>
       <div className="h-16 bg-black sm:h-24" />

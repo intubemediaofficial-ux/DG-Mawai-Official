@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowDown, ArrowUp, CalendarDays, Check, Download, ExternalLink, Film, Home, Image as ImageIcon, Inbox,
-  KeyRound, Loader2, LogOut, Mail, Menu, Music2, Phone, Plus, Save, Share2, Trash2, Type, Upload, User, X,
+  KeyRound, Loader2, LogOut, Mail, Menu, Music2, Phone, Plus, RotateCcw, Save, Share2, Trash2, Type, Upload, User, X,
 } from "lucide-react";
 import Link from "next/link";
 import type { SeoPage, SiteContent, SiteTexts } from "@/lib/siteContent";
@@ -299,7 +299,7 @@ const TABS = [
   { id: "events", label: "Events", icon: CalendarDays },
   { id: "contact", label: "Contact & Social", icon: Share2 },
   { id: "texts", label: "Site Text & SEO", icon: Type },
-  { id: "settings", label: "Settings", icon: KeyRound },
+  { id: "settings", label: "Settings & Undo", icon: KeyRound },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
@@ -313,7 +313,50 @@ const TEXT_FIELDS: (Field & { key: Exclude<keyof SiteTexts, "eventTypes"> })[] =
   { key: "soldOut", label: "Sold out label" }, { key: "aboutMilestones", label: "About: milestones heading" }, { key: "aboutMoments", label: "About: photos heading" },
   { key: "aboutUpcoming", label: "About: upcoming heading" }, { key: "aboutCta", label: "About: booking line" }, { key: "bookEyebrow", label: "Book page: small heading" },
   { key: "bookTitle", label: "Book page: title" }, { key: "bookButton", label: "Book form button" },
+  { key: "contactEmail", label: "Book page: email label" }, { key: "contactWhatsapp", label: "Book page: WhatsApp label" },
+  { key: "contactPhone", label: "Book page: phone label" }, { key: "contactLocation", label: "Book page: location label" },
+  { key: "formName", label: "Form: name placeholder" }, { key: "formPhone", label: "Form: phone placeholder" },
+  { key: "formEmail", label: "Form: email placeholder" }, { key: "formCity", label: "Form: city placeholder" },
+  { key: "formEventType", label: "Form: event type placeholder" }, { key: "formMessage", label: "Form: message placeholder" },
+  { key: "bookSuccessTitle", label: "Booking sent: title ({name} = fan name)" }, { key: "bookSuccessText", label: "Booking sent: message ({phone} = fan phone)", type: "textarea" },
+  { key: "whatsappButton", label: "WhatsApp button" }, { key: "ticketTitle", label: "Ticket popup: heading" },
+  { key: "ticketSuccessTitle", label: "Ticket sent: title" }, { key: "ticketSuccessText", label: "Ticket sent: message ({phone} = fan phone)", type: "textarea" },
 ];
+
+const SECTION_FIELDS: Field[] = [
+  { key: "homeVideos", label: "Home: Latest videos slider", type: "checkbox" }, { key: "homeTagline", label: "Home: tagline text", type: "checkbox" },
+  { key: "homeStats", label: "Home: stats (listeners, songs…)", type: "checkbox" }, { key: "homeNextShow", label: "Home: next performance", type: "checkbox" },
+  { key: "homeBookCta", label: "Home: Book a show link", type: "checkbox" }, { key: "aboutBio", label: "About: biography paragraphs", type: "checkbox" },
+  { key: "aboutMilestones", label: "About: milestones", type: "checkbox" }, { key: "aboutMoments", label: "About: photo slider", type: "checkbox" },
+  { key: "aboutUpcoming", label: "About: upcoming releases", type: "checkbox" }, { key: "aboutCta", label: "About: booking line", type: "checkbox" },
+];
+
+function Backups({ onRestored }: { onRestored: () => void }) {
+  const [items, setItems] = useState<{ name: string; savedAt: string }[] | null>(null);
+  const [busy, setBusy] = useState("");
+  useEffect(() => { fetch("/api/admin/backups").then((r) => r.json()).then(setItems).catch(() => setItems([])); }, []);
+  const restore = async (name: string) => {
+    if (!confirm("Restore website content to this version? Your current content is backed up first.")) return;
+    setBusy(name);
+    const res = await fetch("/api/admin/backups", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) });
+    setBusy("");
+    if (res.ok) { alert("Restored. The website now shows this version."); onRestored(); } else alert("Restore failed");
+  };
+  return (
+    <Section title="Undo / Restore" desc="Every Save keeps a copy of the previous content. Restore any earlier version if something went wrong.">
+      <div className="space-y-2">
+        {items === null && <Loader2 className="animate-spin text-[#d4af37]" />}
+        {items?.length === 0 && <p className="text-sm text-gray-500">No saved versions yet.</p>}
+        {items?.map((b) => (
+          <div key={b.name} className={`${card} flex items-center justify-between gap-3 !py-3`}>
+            <span className="text-sm text-gray-300">{new Date(b.savedAt).toLocaleString("en-IN")}</span>
+            <button className={btnGhost} disabled={Boolean(busy)} onClick={() => restore(b.name)}>{busy === b.name ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />} Restore</button>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
 
 const SEO_PAGES: { id: SeoPage; label: string }[] = [
   { id: "home", label: "Home page" }, { id: "music", label: "Music page" }, { id: "performance", label: "Performance page" },
@@ -330,10 +373,14 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
   const [menu, setMenu] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/admin/content").then((r) => r.json()).then(setContentState);
-    fetch("/api/admin/enquiries").then((r) => r.json()).then(setEnquiries);
+  const loadContent = useCallback(() => {
+    fetch("/api/admin/content").then((r) => r.json()).then((c) => { setContentState(c); setDirty(false); });
   }, []);
+
+  useEffect(() => {
+    loadContent();
+    fetch("/api/admin/enquiries").then((r) => r.json()).then(setEnquiries);
+  }, [loadContent]);
 
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => { if (dirty) e.preventDefault(); };
@@ -347,13 +394,23 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
     setSaved(false);
   }, []);
 
-  const save = async () => {
+  const save = useCallback(async () => {
     if (!content) return;
     setSaving(true);
-    const res = await fetch("/api/admin/content", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(content) });
+    const res = await fetch("/api/admin/content", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(content) }).catch(() => null);
     setSaving(false);
-    if (res.ok) { setDirty(false); setSaved(true); } else alert("Save failed. Please login again.");
-  };
+    if (res?.ok) { setDirty(false); setSaved(true); }
+    else if (res?.status === 401) alert("Session expired. Open the admin in a new tab, login, then press Save here again.");
+    else alert("Save failed. Check your internet and try again.");
+  }, [content]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); if (dirty && !saving) save(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [dirty, saving, save]);
 
   const stats = useMemo(() => [
     { label: "New enquiries", value: enquiries.filter((e) => e.status === "new").length, icon: Inbox, tab: "enquiries" as Tab },
@@ -450,6 +507,7 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
                   <ObjectEditor value={content.about} onChange={(v) => set("about", v)} fields={[
                     { key: "eyebrow", label: "Eyebrow" }, { key: "title", label: "Title" }, { key: "highlight", label: "Highlight" },
                     { key: "heading", label: "Heading" }, { key: "intro", label: "Intro", type: "textarea" }, { key: "image", label: "Biography photo", type: "image" },
+                    { key: "imageFocus", label: "Biography photo focus (crop)", placeholder: "50% 22%" },
                   ]} />
                   <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Paragraphs</p>
                   <StringList items={content.about.paragraphs} onChange={(v) => set("about", { ...content.about, paragraphs: v })} />
@@ -563,6 +621,11 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
                   <ObjectEditor value={content.texts} onChange={(v) => set("texts", v)} fields={TEXT_FIELDS} />
                 </div>
               </Section>
+              <Section title="Show / hide sections" desc="Untick to hide a section from the website.">
+                <div className={card}>
+                  <ObjectEditor value={content.sections} onChange={(v) => set("sections", v)} fields={SECTION_FIELDS} />
+                </div>
+              </Section>
               <Section title="Booking form — event types">
                 <StringList items={content.texts.eventTypes} onChange={(v) => set("texts", { ...content.texts, eventTypes: v })} />
               </Section>
@@ -581,7 +644,12 @@ function Dashboard({ email, onLogout }: { email: string; onLogout: () => void })
             </>
           )}
 
-          {tab === "settings" && <PasswordForm />}
+          {tab === "settings" && (
+            <>
+              <PasswordForm />
+              <Backups onRestored={loadContent} />
+            </>
+          )}
         </main>
       </div>
     </div>

@@ -15,6 +15,6 @@ export async function PUT(request: Request) {
     return Response.json({ error: "Invalid content" }, { status: 400 });
   }
   await saveContent(body);
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return Response.json({ ok: true });
 }
