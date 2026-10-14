@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { Ticket } from "lucide-react";
-import type { SiteEvent } from "@/lib/siteContent";
+import type { SiteContent, SiteEvent } from "@/lib/siteContent";
 import { useSiteContent } from "@/lib/useSiteContent";
 import TicketModal from "@/components/TicketModal";
 import Img from "./Img";
 import Tabs from "./Tabs";
 
-export default function PerformanceList() {
+export default function PerformanceList({ upcoming, past }: { upcoming: SiteEvent[]; past: SiteContent["pastEvents"] }) {
   const { content } = useSiteContent();
   const t = content.texts;
   const [tab, setTab] = useState<"upcoming" | "archives">("upcoming");
@@ -21,8 +21,8 @@ export default function PerformanceList() {
       <Tabs tabs={[{ id: "upcoming", label: t.showsUpcomingTab }, { id: "archives", label: t.showsArchivesTab }]} value={tab} onChange={setTab} />
       <div className="pb-40">
         {tab === "upcoming" &&
-          (content.events.length ? (
-            content.events.map((e, i) => {
+          (upcoming.length ? (
+            upcoming.map((e, i) => {
               const tiers = (e.tickets ?? []).filter((x) => x.name || x.price);
               const sold = /sold/i.test(e.status) || (tiers.length > 0 && tiers.every((x) => x.soldOut));
               return (
@@ -68,7 +68,7 @@ export default function PerformanceList() {
             <p className="py-24 text-center font-light text-muted">{t.noShows}</p>
           ))}
         {tab === "archives" &&
-          content.pastEvents.map((e, i) => (
+          past.map((e, i) => (
             <div key={i} className={row}>
               <div>
                 <p className="text-3xl font-extralight leading-snug text-white sm:text-[2.4rem]">{e.event}</p>

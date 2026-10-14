@@ -5,6 +5,7 @@ import { getContent } from "@/lib/store";
 import JsonLd from "@/components/site/JsonLd";
 import { SITE_URL } from "@/lib/site";
 import type { SiteContent } from "@/lib/siteContent";
+import { hasExactDate, splitEvents } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,8 @@ function structuredData(content: SiteContent) {
   const artistId = `${SITE_URL}/#artist`;
   const sameAs = Object.values(content.socials).filter((u) => typeof u === "string" && u.startsWith("http"));
   const cover = content.photos.find((p) => p.hero) ?? content.photos[0];
-  const events = content.events
+  const events = splitEvents(content)
+    .upcoming.filter(hasExactDate)
     .map((e) => ({ e, start: new Date(`${e.date} ${e.time}`.trim()) }))
     .filter(({ start }) => !Number.isNaN(start.getTime()))
     .map(({ e, start }) => {

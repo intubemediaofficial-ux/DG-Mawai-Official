@@ -5,6 +5,7 @@ import PhotoPanel from "@/components/site/PhotoPanel";
 import VideoCarousel from "@/components/site/VideoCarousel";
 import { pageMetadata } from "@/lib/seo";
 import { getContent } from "@/lib/store";
+import { splitEvents } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 export function generateMetadata(): Promise<Metadata> {
@@ -18,7 +19,7 @@ export default async function Home() {
   const [first, ...rest] = panels;
   const before = rest.slice(0, 2);
   const after = rest.slice(2);
-  const next = content.events[0];
+  const next = splitEvents(content).upcoming[0];
   const show = content.sections;
 
   return (
