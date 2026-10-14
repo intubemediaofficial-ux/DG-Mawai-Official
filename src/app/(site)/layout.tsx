@@ -40,14 +40,21 @@ function structuredData(content: SiteContent) {
     .map(({ e, start }) => {
       const url = e.ticketUrl || `${SITE_URL}/performance`;
       const tiers = (e.tickets ?? []).filter((x) => x.name || x.price);
-      const offer = (name: string | undefined, price: string, soldOut?: boolean) => ({
-        "@type": "Offer",
-        name,
-        price: price.replace(/[^\d.]/g, "") || undefined,
-        priceCurrency: "INR",
-        availability: soldOut || /sold/i.test(e.status) ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-        url,
-      });
+      const validFrom = istDate(new Date(start.getTime() - 30 * 24 * 3600 * 1000), true);
+      const offer = (name: string | undefined, price: string, soldOut?: boolean) => {
+        const amount = price.replace(/[^\d.]/g, "");
+        if (!amount) return null;
+        return {
+          "@type": "Offer",
+          name,
+          price: amount,
+          priceCurrency: "INR",
+          availability: soldOut || /sold/i.test(e.status) ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+          validFrom,
+          url,
+        };
+      };
+      const offers = (tiers.length ? tiers.map((x) => offer(x.name, x.price, x.soldOut)) : [offer(undefined, e.price)]).filter(Boolean);
       return {
         "@type": "MusicEvent",
         name: e.title,
@@ -64,7 +71,7 @@ function structuredData(content: SiteContent) {
         },
         performer: { "@id": artistId },
         organizer: { "@type": "Organization", name: "DG Mawai Official", url: SITE_URL },
-        offers: tiers.length ? tiers.map((x) => offer(x.name, x.price, x.soldOut)) : [offer(undefined, e.price)],
+        offers: offers.length ? offers : undefined,
         url,
       };
     });
